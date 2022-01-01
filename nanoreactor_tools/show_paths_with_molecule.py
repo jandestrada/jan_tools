@@ -1,4 +1,4 @@
-#!/usr/bin/python36
+#!/home/jdep/.conda/envs/my-rdkit-env/bin/python
 from functions import *
 import sys
 file_path = sys.argv[1]

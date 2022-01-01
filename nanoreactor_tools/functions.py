@@ -1,3 +1,11 @@
+#!/home/jdep/.conda/envs/my-rdkit-env/bin/python
+import rdkit
+from rdkit import Chem
+from rdkit.Chem import rdqueries
+from rdkit import RDLogger
+RDLogger.DisableLog('rdApp.*')     
+
+
 def get_reactants_and_products(reaction_label):
     # a reaction label is a string given from the nanoreactor, and has the shape A + B => C + D
     r, p = reaction_label.split("=>")
@@ -55,15 +63,12 @@ def get_atom_number_from_string(atom_symbol):
     p_table = {
         "C":6,
         "H":1,
-        "O":8
+        "O":8,
+        "N":7
     }    
     return p_table[atom_symbol]
 
 def get_n_atoms_in_a_molecule(smi, atom):
-    from rdkit import Chem
-    from rdkit.Chem import rdqueries
-    from rdkit import RDLogger
-    RDLogger.DisableLog('rdApp.*')     
 
 
     if not isinstance(atom, str):
@@ -87,7 +92,17 @@ def get_n_atoms_in_a_molecule(smi, atom):
 
     # return the number of atoms that match query in molecule
     return len(mol.GetAtomsMatchingQuery(q))
+    
+    
+    
+def get_n_rings_in_a_molecule(smi):
+    mol = Chem.MolFromSmiles(smi)
+    if mol == None:
+        print("Smiles:", smi,"did not work...")
+        return 0
 
+    n_rings = mol.GetRingInfo().NumRings()
+    return n_rings
 
 def subselect_reactions_by_n_atoms(set_present_reactions, n=2, atom="C"):
     # will return a subset of reactions that contain a molecule that satisfy the condition
@@ -104,3 +119,32 @@ def subselect_reactions_by_n_atoms(set_present_reactions, n=2, atom="C"):
 
     return satisfying_rxns
 
+def subselect_reactions_by_n_rings(set_present_reactions, n=1):
+
+    satisfying_rxns = []
+    for rxn in set_present_reactions:
+        r_list, p_list = get_reactants_and_products(rxn) 
+
+        n_rings_in_r_list = [get_n_rings_in_a_molecule(molecule) for molecule in r_list]
+        n_rings_in_p_list = [get_n_rings_in_a_molecule(molecule) for molecule in p_list]
+
+        bool_r_list = False
+        bool_p_list = False
+
+        for n_reactant in n_rings_in_r_list:
+            if n_reactant >= n:
+                bool_r_list = True
+
+        for n_product in n_rings_in_p_list:
+            if n_product >= n:
+                bool_p_list = True
+        
+        if bool_r_list or bool_p_list:
+            satisfying_rxns.append(rxn)
+                
+            
+
+
+            satisfying_rxns.append(rxn)
+
+    return satisfying_rxns

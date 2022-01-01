@@ -1,4 +1,4 @@
-#!/usr/bin/python36
+#!/home/jdep/.conda/envs/my-rdkit-env/bin/python
 import sys
 from functions import *
 fp = sys.argv[1]
