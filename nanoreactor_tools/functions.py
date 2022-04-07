@@ -3,6 +3,7 @@ import rdkit
 from rdkit import Chem
 from rdkit.Chem import rdqueries
 from rdkit import RDLogger
+import ruamel.yaml
 RDLogger.DisableLog('rdApp.*')     
 
 
@@ -148,3 +149,25 @@ def subselect_reactions_by_n_rings(set_present_reactions, n=1):
             satisfying_rxns.append(rxn)
 
     return satisfying_rxns
+
+
+
+def get_n_atoms_yaml_file(fp):
+    yaml  = ruamel.yaml.YAML()
+    yaml_file = yaml.load(open(fp, 'r'))
+
+    natoms_per_species = {"C[N-][N+]#N":7,
+                            "C#CC": 7,
+                            "[H][C][C][Cu][C]([H])([H])[H]{1,1}":8,
+                            "[Cu2+]":1,
+                            "[Cu+]":1}   
+    n_atoms = 0
+    n_copper = 0
+    species = yaml_file['species']['base']
+    for s in species:
+        n_atoms+= natoms_per_species[s]
+        if "Cu" in s:
+            n_copper+=1
+    return n_atoms,n_copper
+
+
